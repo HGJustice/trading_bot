@@ -103,7 +103,7 @@ impl TradingBot {
         let response = self
             .client
             .post(&url)
-            .header("auth-token", &self.api_token)
+            .header("auth-token", &self.api_token)f
             .json(&trade)
             .send()
             .await?;
@@ -122,7 +122,7 @@ impl TradingBot {
             &self.account_id
         );
         let close_request = serde_json::json!({
-            "actionType": "POSITION_CLOSE_ID", 
+            "actionType": "POSITION_CLOSE_ID", d
             "positionId": position_id
         });
         

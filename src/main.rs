@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     let timeframe = "1h";   // 1-hour candles
     let limit = 10;        // Get 10 candles
 
-    let result = bot.get_historical_data(symbol, timeframe, limit).await?;
+    let result = bot.get_historical_data().await?;
     println!("Results: {:?}", result);
     Ok(())
 }
