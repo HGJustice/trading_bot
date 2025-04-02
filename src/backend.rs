@@ -4,7 +4,6 @@ use dotenv::dotenv;
 use reqwest::Client;
 use std::env;
 
-
 pub enum Symbol {
     BTC,
     ETH,
@@ -103,7 +102,7 @@ impl TradingBot {
         let response = self
             .client
             .post(&url)
-            .header("auth-token", &self.api_token)f
+            .header("auth-token", &self.api_token)
             .json(&trade)
             .send()
             .await?;
@@ -122,7 +121,7 @@ impl TradingBot {
             &self.account_id
         );
         let close_request = serde_json::json!({
-            "actionType": "POSITION_CLOSE_ID", d
+            "actionType": "POSITION_CLOSE_ID", 
             "positionId": position_id
         });
         

@@ -25,7 +25,7 @@ pub struct TradeRequest {
 #[derive(Deserialize, Debug)]
 pub struct TradeResponse {
     #[serde(rename = "numericCode")]
-    pub numeric_code: u32,
+    pub numeric_code: i32,
     #[serde(rename = "stringCode")]
     pub string_code: String,
     pub message: String,
