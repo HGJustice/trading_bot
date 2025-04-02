@@ -9,6 +9,12 @@ pub enum Symbol {
     ETH,
 }
 
+impl Symbol {
+    pub fn match_str(symbol: Symbol) -> Result<String>{
+        todo!()
+    }
+}
+
 pub struct TradingBot {
     client: Client,
     account_id: String,
@@ -88,11 +94,27 @@ impl TradingBot {
         Ok((bid, ask))
     }
 
-    pub async fn get_historical_data(&self, ) -> Result<()> {
-        todo!();
+    pub async fn get_historical_data(&self, symbol: Symbol, timeframe: String) -> Result<()> {
+        let currency = match symbol {
+            Symbol::BTC => "BTCUSD".to_string(),
+            Symbol::ETH => "ETHUSD".to_string(),
+        };
+
+
+        let url = format!("{}/users/current/accounts/{}/historical-market-data/symbols/{}/timeframes/{}/candles", self.api_token, self.account_id, currency, timeframe);
+
+        let responce = self.client.post(&url).header("auth-token", &self.api_token).send().await?;
+
+        if !responce.status().is_success() {
+            let error = responce.text().await?;
+            bail!("Failed getting historical data {}", error);
+        }
+
+
+       Ok(())
     }
 
-    pub async fn execute_trade(&self, trade: TradeRequest) -> Result<TradeResponse> {
+    pub async fn open_trade(&self, trade: TradeRequest) -> Result<TradeResponse> {
         let url = format!(
             "{}/users/current/accounts/{}/trade",
             env::var("API_URL").context("API_URL is not set in the environment file")?,
