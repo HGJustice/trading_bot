@@ -1,4 +1,4 @@
-use crate::order_management::{TradeRequest, TradeResponse};
+use crate::order_management::*;
 use anyhow::{ bail, Context, Ok, Result};
 use dotenv::dotenv;
 use reqwest::Client;
@@ -94,24 +94,41 @@ impl TradingBot {
         Ok((bid, ask))
     }
 
-    pub async fn get_historical_data(&self, symbol: Symbol, timeframe: String) -> Result<()> {
+    pub async fn get_historical_data(&self, symbol: Symbol, timeframe: String, start_time: String, limit: u32) -> Result<Vec<Candle>> {
         let currency = match symbol {
             Symbol::BTC => "BTCUSD".to_string(),
             Symbol::ETH => "ETHUSD".to_string(),
         };
-
-
-        let url = format!("{}/users/current/accounts/{}/historical-market-data/symbols/{}/timeframes/{}/candles", self.api_token, self.account_id, currency, timeframe);
-
-        let responce = self.client.post(&url).header("auth-token", &self.api_token).send().await?;
-
-        if !responce.status().is_success() {
-            let error = responce.text().await?;
+    
+        // Use the New York region URL that we confirmed works
+        let base_url = "https://mt-market-data-client-api-v1.new-york.agiliumtrade.ai";
+        
+        // Build URL - handling empty start_time case
+        let url = if start_time.is_empty() {
+            format!(
+                "{}/users/current/accounts/{}/historical-market-data/symbols/{}/timeframes/{}/candles?limit={}", 
+                base_url, &self.account_id, currency, timeframe, limit
+            )
+        } else {
+            format!(
+                "{}/users/current/accounts/{}/historical-market-data/symbols/{}/timeframes/{}/candles?startTime={}&limit={}", 
+                base_url, &self.account_id, currency, timeframe, start_time, limit
+            )
+        };
+        
+        let response = self.client
+            .get(&url)
+            .header("auth-token", &self.api_token)
+            .send()
+            .await?;
+    
+        if !response.status().is_success() {
+            let error = response.text().await?;
             bail!("Failed getting historical data {}", error);
         }
-
-
-       Ok(())
+    
+        let candles: Vec<Candle> = response.json().await?;
+        Ok(candles)
     }
 
     pub async fn open_trade(&self, trade: TradeRequest) -> Result<TradeResponse> {

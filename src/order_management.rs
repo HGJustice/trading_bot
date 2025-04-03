@@ -34,3 +34,20 @@ pub struct TradeResponse {
     #[serde(rename = "positionId")]
     pub position_id: Option<String>,
 }
+
+#[derive(Deserialize, Debug)]
+pub struct Candle {
+    pub symbol: String,
+    pub timeframe: String,
+    pub time: String,
+    #[serde(rename = "brokerTime")]
+    pub broker_time: String,
+    pub open: f32,
+    pub high: f32,
+    pub low: f32,
+    pub close: f32,
+    #[serde(rename = "tickVolume")]
+    pub tick_volume: u32,
+    pub spread: u32,
+    pub volume: u32
+}
