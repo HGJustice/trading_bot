@@ -1,10 +1,5 @@
 use anyhow::{Ok, Result};
 
-
-pub async fn get_eth_usdt_price() -> Result<()> {
-
-}
-
 pub async fn get_eth_btc_price() -> Result<()> {
 
 }

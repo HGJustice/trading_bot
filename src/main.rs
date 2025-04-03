@@ -8,7 +8,7 @@ async fn main() -> Result<()> {
     println!("Bot initialized successfully");
    
 
-    let candles = bot.get_historical_data(Symbol::ETH, String::from("1h"), String::new(), 48).await?;
+    let candles = bot.get_historical_data(Symbol::ETH, String::from("1h")).await?;
     println!("Candles: {:#?}", candles);
     Ok(())
 }

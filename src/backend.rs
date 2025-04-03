@@ -94,27 +94,13 @@ impl TradingBot {
         Ok((bid, ask))
     }
 
-    pub async fn get_historical_data(&self, symbol: Symbol, timeframe: String, start_time: String, limit: u32) -> Result<Vec<Candle>> {
+    pub async fn get_historical_data(&self, symbol: Symbol, timeframe: String) -> Result<Vec<Candle>> {
         let currency = match symbol {
             Symbol::BTC => "BTCUSD".to_string(),
             Symbol::ETH => "ETHUSD".to_string(),
         };
     
-        // Use the New York region URL that we confirmed works
-        let base_url = "https://mt-market-data-client-api-v1.new-york.agiliumtrade.ai";
-        
-        // Build URL - handling empty start_time case
-        let url = if start_time.is_empty() {
-            format!(
-                "{}/users/current/accounts/{}/historical-market-data/symbols/{}/timeframes/{}/candles?limit={}", 
-                base_url, &self.account_id, currency, timeframe, limit
-            )
-        } else {
-            format!(
-                "{}/users/current/accounts/{}/historical-market-data/symbols/{}/timeframes/{}/candles?startTime={}&limit={}", 
-                base_url, &self.account_id, currency, timeframe, start_time, limit
-            )
-        };
+        let url = format!("{}/users/current/accounts/{}/historical-market-data/symbols/{}/timeframes/{}/candles?limit={}", env::var("STATUS_API_URL").context("failed to load meta status api")?, &self.account_id, currency, timeframe, 48);
         
         let response = self.client
             .get(&url)
