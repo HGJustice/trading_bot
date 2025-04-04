@@ -11,7 +11,14 @@ pub enum Symbol {
 
 impl Symbol {
     pub fn match_str(symbol: Symbol) -> Result<String>{
-        todo!()
+        match symbol {
+            Symbol::BTC => {
+                return Ok(String::from("BTCUSD"))
+            }
+            Symbol::ETH => {
+              return Ok(String::from("ETHUSD"))
+            }
+        };
     }
 }
 
@@ -65,10 +72,7 @@ impl TradingBot {
 
     pub async fn get_asset_price(&self, asset: Symbol) -> Result<(f64, f64)> {
 
-        let currency = match asset {
-            Symbol::BTC => "BTCUSD".to_string(),
-            Symbol::ETH => "ETHUSD".to_string(),
-        };
+        let currency = Symbol::match_str(asset)?;
 
         let url = format!(
             "{}/users/current/accounts/{}/symbols/{}/current-price",
@@ -94,11 +98,8 @@ impl TradingBot {
         Ok((bid, ask))
     }
 
-    pub async fn get_historical_data(&self, symbol: Symbol, timeframe: String) -> Result<Vec<Candle>> {
-        let currency = match symbol {
-            Symbol::BTC => "BTCUSD".to_string(),
-            Symbol::ETH => "ETHUSD".to_string(),
-        };
+    pub async fn get_historical_data(&self, asset: Symbol, timeframe: &str) -> Result<Vec<Candle>> {
+        let currency = Symbol::match_str(asset)?;
     
         let url = format!("{}/users/current/accounts/{}/historical-market-data/symbols/{}/timeframes/{}/candles?limit={}", env::var("STATUS_API_URL").context("failed to load meta status api")?, &self.account_id, currency, timeframe, 48);
         
@@ -117,6 +118,22 @@ impl TradingBot {
         Ok(candles)
     }
 
+    pub async fn get_current_candle(&self, asset: Symbol, timeframe: &str) -> Result<Candle>{
+        let currency = Symbol::match_str(asset)?;
+
+        let url = format!("{}/users/current/accounts/{}/symbols/{}/current-candles/{}?keepSubscription=false", env::var("API_URL").context("API URL not provided in env file")?, self.account_id, currency, timeframe);
+        
+        let response = self.client.get(&url).header("auth-token", &self.api_token).send().await?;
+
+        if !response.status().is_success() {
+            let error = response.text().await?;
+            bail!("Failed getting candle data {}", error);
+        }
+
+        let candle: Candle = response.json().await?;
+        Ok(candle)
+    }
+
     pub async fn open_trade(&self, trade: TradeRequest) -> Result<TradeResponse> {
         let url = format!(
             "{}/users/current/accounts/{}/trade",
@@ -131,15 +148,17 @@ impl TradingBot {
             .json(&trade)
             .send()
             .await?;
+
         if !response.status().is_success() {
             let error_text = response.text().await?;
             bail!("Failed to execute trade: {}", error_text);
         }
+
         let trade_response: TradeResponse = response.json().await?;
         Ok(trade_response)
     }
 
-    pub async fn close_trade(&self, position_id: String) -> Result<TradeResponse> {
+    pub async fn close_trade(&self, position_id: &str) -> Result<TradeResponse> {
         let url = format!(
             "{}/users/current/accounts/{}/trade",
             env::var("API_URL").context("API_URL is not set in the environment file")?,

@@ -48,6 +48,5 @@ pub struct Candle {
     pub close: f32,
     #[serde(rename = "tickVolume")]
     pub tick_volume: u32,
-    pub spread: u32,
-    pub volume: u32
+    pub spread: f32,
 }
