@@ -98,10 +98,10 @@ impl TradingBot {
         Ok((bid, ask))
     }
 
-    pub async fn get_historical_data(&self, asset: Symbol, timeframe: &str) -> Result<Vec<Candle>> {
+    pub async fn get_historical_data(&self, asset: Symbol, timeframe: &str, limit: u32) -> Result<Vec<Candle>> {
         let currency = Symbol::match_str(asset)?;
     
-        let url = format!("{}/users/current/accounts/{}/historical-market-data/symbols/{}/timeframes/{}/candles?limit={}", env::var("STATUS_API_URL").context("failed to load meta status api")?, &self.account_id, currency, timeframe, 48);
+        let url = format!("{}/users/current/accounts/{}/historical-market-data/symbols/{}/timeframes/{}/candles?limit={}", env::var("STATUS_API_URL").context("failed to load meta status api")?, &self.account_id, currency, timeframe, limit);
         
         let response = self.client
             .get(&url)
