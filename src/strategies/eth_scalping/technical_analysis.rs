@@ -1,27 +1,34 @@
 use crate::backend::*;
 use crate::order_management::*;
 use anyhow::{Ok, Result};
-use tokio::time::{Sleep, Duration};
 
 pub async fn scalp_long(bot: TradingBot, asset: Symbol) -> Result<()> {
     let currency = Symbol::match_str(asset)?;
 
-    let candles = bot.get_historical_data(currency, "4h", 186).await?;
+    let candles = bot.get_historical_data(&currency, "4h", 186).await?;
     let mut lowest_close = &candles[0];
 
-    for i in 1..&candles.len() {
+    for i in 1..candles.len() {
         if candles[i].close < lowest_close.close {
             lowest_close = &candles[i];
         }
     }
 
     loop {
-        let first_15m_candle = bot.get_current_candle(currency, "15m").await?; // this api calls bugs out, so gotta call couple time
-                                                                                // till candle appears
-
+        let first_15m_candle = loop {
+            match bot.get_current_candle(&currency, "15m").await {
+                Ok(candle) => break candle,
+                Err(_) => continue,
+            }
+        };                                         
         if first_15m_candle.close <= lowest_close.close {
             // sleep for the rest of the time till new 15 m, candle appears
-            let second_15m_candle = bot.get_current_candle(currency, "15m").await?;
+            let second_15m_candle = loop {
+                match bot.get_current_candle(&currency, "15m").await {
+                    Ok(candle) => break candle,
+                    Err(_) => continue,
+                }
+            };
             //check that this candle is 15 ahead of the 1st one
             if second_15m_candle.close > first_15m_candle.close {
                 let trade = TradeRequest{
@@ -33,9 +40,12 @@ pub async fn scalp_long(bot: TradingBot, asset: Symbol) -> Result<()> {
                     stop_loss: None,
                 };
                 bot.open_trade(trade).await?;
-                break;
             }
         }
     }
     Ok(())
+}
+
+pub async fn  scalp_short() -> Result<()> {
+    todo!();
 }
