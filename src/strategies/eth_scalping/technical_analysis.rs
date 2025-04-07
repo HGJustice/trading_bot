@@ -1,5 +1,6 @@
 use crate::backend::*;
 use crate::order_management::*;
+use std::time::Duration;
 use anyhow::{Ok, Result};
 
 pub async fn scalp_long(bot: TradingBot, asset: Symbol) -> Result<()> {
@@ -22,7 +23,7 @@ pub async fn scalp_long(bot: TradingBot, asset: Symbol) -> Result<()> {
             }
         };                                         
         if first_15m_candle.close <= lowest_close.close {
-            // sleep for the rest of the time till new 15 m, candle appears
+            tokio::time::sleep(tokio::time::Duration::from_secs(900)).await;
             let second_15m_candle = loop {
                 match bot.get_current_candle(&currency, "15m").await {
                     Ok(candle) => break candle,
@@ -46,6 +47,6 @@ pub async fn scalp_long(bot: TradingBot, asset: Symbol) -> Result<()> {
     Ok(())
 }
 
-pub async fn  scalp_short() -> Result<()> {
+pub async fn scalp_short() -> Result<()> {
     todo!();
 }
