@@ -21,16 +21,17 @@ pub async fn scalp_long(bot: TradingBot, asset: Symbol) -> Result<()> {
                 Ok(candle) => break candle,
                 Err(_) => continue,
             }
-        };                                         
+        }; 
+        
         if first_15m_candle.close <= lowest_close.close {
-            tokio::time::sleep(tokio::time::Duration::from_secs(900)).await;
-            let second_15m_candle = loop {
+            tokio::time::sleep(tokio::time::Duration::from_secs(900)).await; // maybe get current time and then wait the diffrence? so if its 12:07, wait the 8 min
+            let second_15m_candle = loop {                                      // chrono??
                 match bot.get_current_candle(&currency, "15m").await {
                     Ok(candle) => break candle,
                     Err(_) => continue,
                 }
             };
-            //check that this candle is 15 ahead of the 1st one
+            //check that this candle is 15 ahead of the 1st one, so maybe use chrono??
             if second_15m_candle.close > first_15m_candle.close {
                 let trade = TradeRequest{
                     symbol: currency, 

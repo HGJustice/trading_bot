@@ -10,7 +10,7 @@ pub enum Symbol {
 }
 
 impl Symbol {
-    pub fn match_str(symbol: Symbol) -> Result<String> {
+    pub fn match_str(symbol: &Symbol) -> Result<String> {
         match symbol {
             Symbol::BTC => return Ok(String::from("BTCUSD")),
             Symbol::ETH => return Ok(String::from("ETHUSD")),
@@ -67,7 +67,7 @@ impl TradingBot {
     }
 
     pub async fn get_asset_price(&self, asset: Symbol) -> Result<(f64, f64)> {
-        let currency = Symbol::match_str(asset)?;
+        let currency = Symbol::match_str(&asset)?;
 
         let url = format!(
             "{}/users/current/accounts/{}/symbols/{}/current-price",
@@ -97,7 +97,7 @@ impl TradingBot {
 
     pub async fn get_historical_data(
         &self,
-        asset: Symbol,
+        asset: &Symbol,
         timeframe: &str,
         limit: u32,
     ) -> Result<Vec<Candle>> {
@@ -122,7 +122,7 @@ impl TradingBot {
     }
 
     pub async fn get_current_candle(&self, asset: Symbol, timeframe: &str) -> Result<Candle> {
-        let currency = Symbol::match_str(asset)?;
+        let currency = Symbol::match_str(&asset)?;
 
         let url = format!(
             "{}/users/current/accounts/{}/symbols/{}/current-candles/{}?keepSubscription=false",
