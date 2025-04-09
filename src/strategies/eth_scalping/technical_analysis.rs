@@ -33,13 +33,16 @@ pub async fn scalp_long(bot: TradingBot, asset: Symbol) -> Result<()> {
             };
             //check that this candle is 15 ahead of the 1st one, so maybe use chrono??
             if second_15m_candle.close > first_15m_candle.close {
+                let tp = second_15m_candle.close * 1.03; // 3% take profit
+                let sl = second_15m_candle.close * 0.99; // 1% stop loss
+
                 let trade = TradeRequest{
                     symbol: currency, 
                     action_type: OrderTypeBuy,
                     volume: 5.0,
                     open_price: None,
-                    take_profit: None,
-                    stop_loss: None,
+                    take_profit: Some(tp),
+                    stop_loss: Some(sl),
                 };
                 bot.open_trade(trade).await?;
             }

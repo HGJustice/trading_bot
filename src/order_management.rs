@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use chrono::{ DateTime, Utc};
 
 #[derive(Serialize, Debug)]
 pub enum OrderType {
@@ -40,7 +41,6 @@ pub struct Candle {
     pub symbol: String,
     pub timeframe: String,
     pub time: String,
-    #[serde(rename = "brokerTime")]
     pub broker_time: String,
     pub open: f32,
     pub high: f32,
